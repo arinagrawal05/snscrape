@@ -1,18 +1,15 @@
-import pkgutil
 import importlib
-
+import pkgutil
 
 __all__ = []
 
-
 def _import_modules():
-	prefixLen = len(__name__) + 1
-	for importer, moduleName, isPkg in pkgutil.iter_modules(__path__, prefix = f'{__name__}.'):
-		assert not isPkg
-		moduleNameWithoutPrefix = moduleName[prefixLen:]
-		__all__.append(moduleNameWithoutPrefix)
-		module = importlib.import_module(f'snscrape.modules.{moduleName}')
-		globals()[moduleNameWithoutPrefix] = module
-
+    # Dynamically import all submodules inside this package
+    for loader, moduleName, isPkg in pkgutil.iter_modules(__path__):
+        if isPkg:
+            continue  # skip any subpackages
+        __all__.append(moduleName)
+        module = importlib.import_module(f"{__name__}.{moduleName}")
+        globals()[moduleName] = module
 
 _import_modules()
